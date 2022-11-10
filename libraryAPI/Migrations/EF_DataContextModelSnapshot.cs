@@ -24,25 +24,33 @@ namespace libraryAPI.Migrations
 
             modelBuilder.Entity("libraryAPI.EfCore.Author", b =>
                 {
-                    b.Property<string>("name")
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
+
+                    b.Property<string>("country")
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("date_of_birth")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("country")
-                        .IsRequired()
+                    b.Property<string>("name")
                         .HasColumnType("text");
 
-                    b.HasKey("name", "date_of_birth");
+                    b.HasKey("id");
 
                     b.ToTable("author");
                 });
 
             modelBuilder.Entity("libraryAPI.EfCore.Book", b =>
                 {
-                    b.Property<string>("name")
-                        .HasColumnType("text");
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
 
                     b.Property<DateTime?>("date_of_first_publication")
                         .HasColumnType("timestamp with time zone");
@@ -50,36 +58,42 @@ namespace libraryAPI.Migrations
                     b.Property<int>("edition")
                         .HasColumnType("integer");
 
+                    b.Property<string>("isbn")
+                        .HasColumnType("text");
+
+                    b.Property<string>("name")
+                        .HasColumnType("text");
+
                     b.Property<string>("original_language")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("publisher")
-                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("name", "date_of_first_publication");
+                    b.HasKey("id");
 
                     b.ToTable("book");
                 });
 
             modelBuilder.Entity("libraryAPI.EfCore.Relation", b =>
                 {
-                    b.Property<string>("bookname")
-                        .HasColumnType("text");
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
 
-                    b.Property<DateTime?>("bookdate_of_first_publication")
-                        .HasColumnType("timestamp with time zone");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
 
-                    b.Property<string>("authorname")
-                        .HasColumnType("text");
+                    b.Property<int>("authorid")
+                        .HasColumnType("integer");
 
-                    b.Property<DateTime?>("authordate_of_birth")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<int>("bookid")
+                        .HasColumnType("integer");
 
-                    b.HasKey("bookname", "bookdate_of_first_publication", "authorname", "authordate_of_birth");
+                    b.HasKey("id");
 
-                    b.HasIndex("authorname", "authordate_of_birth");
+                    b.HasIndex("authorid");
+
+                    b.HasIndex("bookid");
 
                     b.ToTable("relation");
                 });
@@ -88,13 +102,13 @@ namespace libraryAPI.Migrations
                 {
                     b.HasOne("libraryAPI.EfCore.Author", "author")
                         .WithMany()
-                        .HasForeignKey("authorname", "authordate_of_birth")
+                        .HasForeignKey("authorid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("libraryAPI.EfCore.Book", "book")
                         .WithMany()
-                        .HasForeignKey("bookname", "bookdate_of_first_publication")
+                        .HasForeignKey("bookid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

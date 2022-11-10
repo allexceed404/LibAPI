@@ -9,18 +9,13 @@ public class EF_DataContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Book>().HasKey(row => new{
-            row.name,
-            row.date_of_first_publication
+            row.id
         });
         modelBuilder.Entity<Author>().HasKey(row => new{
-            row.name,
-            row.date_of_birth
+            row.id
         });
         modelBuilder.Entity<Relation>().HasKey(row => new{
-            row.bookname,
-            row.bookdate_of_first_publication,
-            row.authorname,
-            row.authordate_of_birth
+            row.id
         });
     }
 }
