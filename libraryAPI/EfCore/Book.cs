@@ -11,4 +11,5 @@ public class Book
 	public int edition { get; set; }  
 	public string? publisher { get; set; }
 	public string? original_language { get; set; }
+	public List<Author> authors { get; set; } = new List<Author>();
 }

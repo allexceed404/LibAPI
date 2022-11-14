@@ -44,6 +44,30 @@ namespace libraryAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AuthorBook",
+                columns: table => new
+                {
+                    authorsid = table.Column<int>(type: "integer", nullable: false),
+                    booksid = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AuthorBook", x => new { x.authorsid, x.booksid });
+                    table.ForeignKey(
+                        name: "FK_AuthorBook_author_authorsid",
+                        column: x => x.authorsid,
+                        principalTable: "author",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AuthorBook_book_booksid",
+                        column: x => x.booksid,
+                        principalTable: "book",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "relation",
                 columns: table => new
                 {
@@ -70,6 +94,11 @@ namespace libraryAPI.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_AuthorBook_booksid",
+                table: "AuthorBook",
+                column: "booksid");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_relation_authorid",
                 table: "relation",
                 column: "authorid");
@@ -82,6 +111,9 @@ namespace libraryAPI.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AuthorBook");
+
             migrationBuilder.DropTable(
                 name: "relation");
 

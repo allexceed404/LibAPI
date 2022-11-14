@@ -12,7 +12,7 @@ using libraryAPI.EfCore;
 namespace libraryAPI.Migrations
 {
     [DbContext(typeof(EF_DataContext))]
-    [Migration("20221110104850_M1")]
+    [Migration("20221114085129_M1")]
     partial class M1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,6 +23,21 @@ namespace libraryAPI.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("AuthorBook", b =>
+                {
+                    b.Property<int>("authorsid")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("booksid")
+                        .HasColumnType("integer");
+
+                    b.HasKey("authorsid", "booksid");
+
+                    b.HasIndex("booksid");
+
+                    b.ToTable("AuthorBook");
+                });
 
             modelBuilder.Entity("libraryAPI.EfCore.Author", b =>
                 {
@@ -98,6 +113,21 @@ namespace libraryAPI.Migrations
                     b.HasIndex("bookid");
 
                     b.ToTable("relation");
+                });
+
+            modelBuilder.Entity("AuthorBook", b =>
+                {
+                    b.HasOne("libraryAPI.EfCore.Author", null)
+                        .WithMany()
+                        .HasForeignKey("authorsid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("libraryAPI.EfCore.Book", null)
+                        .WithMany()
+                        .HasForeignKey("booksid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("libraryAPI.EfCore.Relation", b =>

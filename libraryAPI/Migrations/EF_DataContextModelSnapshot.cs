@@ -22,6 +22,21 @@ namespace libraryAPI.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("AuthorBook", b =>
+                {
+                    b.Property<int>("authorsid")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("booksid")
+                        .HasColumnType("integer");
+
+                    b.HasKey("authorsid", "booksid");
+
+                    b.HasIndex("booksid");
+
+                    b.ToTable("AuthorBook");
+                });
+
             modelBuilder.Entity("libraryAPI.EfCore.Author", b =>
                 {
                     b.Property<int>("id")
@@ -96,6 +111,21 @@ namespace libraryAPI.Migrations
                     b.HasIndex("bookid");
 
                     b.ToTable("relation");
+                });
+
+            modelBuilder.Entity("AuthorBook", b =>
+                {
+                    b.HasOne("libraryAPI.EfCore.Author", null)
+                        .WithMany()
+                        .HasForeignKey("authorsid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("libraryAPI.EfCore.Book", null)
+                        .WithMany()
+                        .HasForeignKey("booksid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("libraryAPI.EfCore.Relation", b =>

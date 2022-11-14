@@ -7,61 +7,55 @@ public class DbHelper
     {
         _context = context;
     }
-    public List<RelationModel> GetEntries()
+    public List<Book> GetEntries()
     {
         //GET
-        List<RelationModel> response = new List<RelationModel>();
-        List<Relation> relationList = _context.Relations.ToList();
-        foreach(Relation rel in relationList){
-            var book = _context.Books.Where(
-                b=>b.id==rel.bookid
-            ).FirstOrDefault();
-            var author = _context.Authors.Where(
-                a=>a.id==rel.authorid
-            ).FirstOrDefault();
-            response.Add(new RelationModel(){
-                book_name = book.name,
-                book_date_of_first_publication  = book.date_of_first_publication ,
-                author_name = author.name,
-                author_date_of_birth = author.date_of_birth
-            });
+        List<Book> response = new List<Book>();
+        List<Book> bookList = _context.Books.ToList();
+        foreach(Book book in bookList){
+            List<Author> authorList = new List<Author>();
+            List<Relation> relationList = _context.Relations.Where(
+                r=>r.bookid==book.id
+            ).ToList();
+            foreach(Relation rel in relationList){
+                var author = _context.Authors.Where(
+                    a=>a.id==rel.authorid
+                ).FirstOrDefault();
+                authorList.Add(author);
+            }
+            book.authors = authorList;
+            response.Add(book);
         }
         return response;
     }
-    public void PostEntry(RelationModel relationModel)
+    public void PostEntry(Book bookIn, Author authorIn)
     {
         //POST
         var book = _context.Books.Where(
-            b=>b.name==relationModel.book_name&&
-            b.date_of_first_publication==relationModel.book_date_of_first_publication
+            b=>b.name==bookIn.name&&
+            b.date_of_first_publication==bookIn.date_of_first_publication
         ).FirstOrDefault();
         if(book==null){
-            book = new Book();
-            book.name=relationModel.book_name;
-            book.date_of_first_publication=relationModel.book_date_of_first_publication;
-            _context.Books.Add(book);
+            _context.Books.Add(bookIn);
             _context.SaveChanges();
             
             book = _context.Books.Where(
-                b=>b.name==relationModel.book_name&&
-                b.date_of_first_publication==relationModel.book_date_of_first_publication
+                b=>b.name==bookIn.name&&
+                b.date_of_first_publication==bookIn.date_of_first_publication
             ).FirstOrDefault();
         }
 
         var author = _context.Authors.Where(
-            a=>a.name==relationModel.author_name&&
-            a.date_of_birth==relationModel.author_date_of_birth
+            a=>a.name==authorIn.name&&
+            a.date_of_birth==authorIn.date_of_birth
         ).FirstOrDefault();
         if(author==null){
-            author = new Author();
-            author.name = relationModel.author_name;
-            author.date_of_birth = relationModel.author_date_of_birth;
-            _context.Authors.Add(author);
+            _context.Authors.Add(authorIn);
             _context.SaveChanges();
 
             author = _context.Authors.Where(
-                a=>a.name==relationModel.author_name&&
-                a.date_of_birth==relationModel.author_date_of_birth
+                a=>a.name==authorIn.name&&
+                a.date_of_birth==authorIn.date_of_birth
             ).FirstOrDefault();
         }
         
@@ -79,52 +73,52 @@ public class DbHelper
             _context.SaveChanges();
         }
     }
-    public void DeleteEntry(RelationModel relationModel)
+    public void DeleteEntry(Book bookDel, Author authorDel)
     {
         //DELETE
         var book = _context.Books.Where(
-            b=>b.name==relationModel.book_name&&
-            b.date_of_first_publication==relationModel.book_date_of_first_publication
+            b=>b.name==bookDel.name&&
+            b.date_of_first_publication==bookDel.date_of_first_publication
         ).FirstOrDefault();
 
         var author = _context.Authors.Where(
-            a=>a.name==relationModel.author_name&&
-            a.date_of_birth==relationModel.author_date_of_birth
+            a=>a.name==authorDel.name&&
+            a.date_of_birth==authorDel.date_of_birth
         ).FirstOrDefault();
         if(book!=null && author!=null){
-            var relation = _context.Relations.Where(
+            var relationDel = _context.Relations.Where(
                 r=>r.bookid==book.id&&
                 r.authorid==author.id
             ).FirstOrDefault();
-            if(relation!=null){
-                _context.Relations.Remove(relation);
+            if(relationDel!=null){
+                _context.Relations.Remove(relationDel);
                 _context.SaveChanges();
 
-                relation = _context.Relations.Where(
+                relationDel = _context.Relations.Where(
                     r=>r.bookid==book.id
                 ).FirstOrDefault();
-                if(relation==null){
+                if(relationDel==null){
                     _context.Books.Remove(book);
                     _context.SaveChanges();
                 }
 
-                relation = _context.Relations.Where(
+                relationDel = _context.Relations.Where(
                     r=>r.authorid==author.id
                 ).FirstOrDefault();
-                if(relation==null){
+                if(relationDel==null){
                     _context.Authors.Remove(author);
                     _context.SaveChanges();
                 }
             }
         }
     }
-    public List<BookModel> GetBooks()
+    public List<Book> GetBooks()
     {
         //GET
-        List<BookModel> response = new List<BookModel>();
+        List<Book> response = new List<Book>();
         List<Book> bookList = _context.Books.ToList();
         foreach(Book book in bookList){
-            List<AuthorModel> authorList = new List<AuthorModel>();
+            List<Author> authorList = new List<Author>();
             List<Relation> relationList = _context.Relations.Where(
                 r=>r.bookid==book.id
             ).ToList();
@@ -132,33 +126,22 @@ public class DbHelper
                 var author = _context.Authors.Where(
                     a=>a.id==rel.authorid
                 ).FirstOrDefault();
-                authorList.Add(new AuthorModel(){
-                    name = author.name,
-                    date_of_birth = author.date_of_birth,
-                    country = author.country
-                });
+                authorList.Add(author);
             }
-            response.Add(new BookModel(){
-                isbn = book.isbn,
-                name = book.name,
-                date_of_first_publication = book.date_of_first_publication,
-                edition = book.edition,
-                publisher = book.publisher,
-                original_language = book.original_language,
-                authors = authorList
-            });
+            book.authors = authorList;
+            response.Add(book);
         }
         return response;
     }
-    public List<BookModel> SearchBook(BookModel bookModel)
+    public List<Book> SearchBook(Book bookSearch)
     {
         //GET-SEARCH
-        List<BookModel> response = new List<BookModel>();
+        List<Book> response = new List<Book>();
         List<Book> bookList = _context.Books.Where(
-            b=>b.name==bookModel.name
+            b=>b.name==bookSearch.name
         ).ToList();
         foreach(Book book in bookList){
-            List<AuthorModel> authorList = new List<AuthorModel>();
+            List<Author> authorList = new List<Author>();
             List<Relation> relationList = _context.Relations.Where(
                 r=>r.bookid==book.id
             ).ToList();
@@ -166,73 +149,51 @@ public class DbHelper
                 var author = _context.Authors.Where(
                     a=>a.id==rel.authorid
                 ).FirstOrDefault();
-                authorList.Add(new AuthorModel(){
-                    name = author.name,
-                    date_of_birth = author.date_of_birth,
-                    country = author.country
-                });
+                authorList.Add(author);
             }
-            response.Add(new BookModel(){
-                isbn = book.isbn,
-                name = book.name,
-                date_of_first_publication = book.date_of_first_publication,
-                edition = book.edition,
-                publisher = book.publisher,
-                original_language = book.original_language,
-                authors = authorList
-            });
+            book.authors = authorList;
+            response.Add(book);
         }
         return response;
     }
-    public void PostBook(BookModel bookModel)
+    public void PostBook(Book bookIn)
     {
         var book = _context.Books.Where(
-            b=>b.name==bookModel.name&&
-            b.date_of_first_publication==bookModel.date_of_first_publication
+            b=>b.name==bookIn.name&&
+            b.date_of_first_publication==bookIn.date_of_first_publication
         ).FirstOrDefault();
         if(book==null){
             //POST
             book = new Book(){
-                isbn = bookModel.isbn,
-                name = bookModel.name,
-                date_of_first_publication = bookModel.date_of_first_publication,
-                edition = bookModel.edition,
-                publisher = bookModel.publisher,
-                original_language = bookModel.original_language
+                isbn = bookIn.isbn,
+                name = bookIn.name,
+                date_of_first_publication = bookIn.date_of_first_publication,
+                edition = bookIn.edition,
+                publisher = bookIn.publisher,
+                original_language = bookIn.original_language
             };
             _context.Books.Add(book);
             _context.SaveChanges();
-            foreach(AuthorModel author in bookModel.authors)
+            foreach(Author author in bookIn.authors)
             {
                 var addAuthor = _context.Authors.Where(
                     a=>a.name==author.name&&
                     a.date_of_birth==author.date_of_birth
                 ).FirstOrDefault();
                 if(addAuthor==null){
-                    addAuthor = new Author(){
-                        name = author.name,
-                        date_of_birth = author.date_of_birth,
-                        country = author.country
-                    };
-                    _context.Authors.Add(addAuthor);
+                    _context.Authors.Add(author);
                     _context.SaveChanges();
                 }
-                RelationModel relation = new RelationModel(){
-                    book_name = bookModel.name,
-                    book_date_of_first_publication = bookModel.date_of_first_publication,
-                    author_name = author.name,
-                    author_date_of_birth = author.date_of_birth
-                };
-                PostEntry(relation);
+                PostEntry(bookIn, author);
             }
         }
         else{
             //PUT
-            book.edition = bookModel.edition;
-            book.publisher = bookModel.publisher;
-            book.original_language = bookModel.original_language;
+            if(bookIn.edition!=0) book.edition = bookIn.edition;
+            if(bookIn.publisher!=null) book.publisher = bookIn.publisher;
+            if(bookIn.original_language!=null) book.original_language = bookIn.original_language;
             _context.SaveChanges();
-            foreach(AuthorModel author in bookModel.authors)
+            foreach(Author author in bookIn.authors)
             {
                 var addAuthor = _context.Authors.Where(
                     a=>a.name==author.name&&
@@ -247,35 +208,29 @@ public class DbHelper
                     _context.Authors.Add(addAuthor);
                     _context.SaveChanges();
                 }
-                RelationModel relation = new RelationModel(){
-                    book_name = bookModel.name,
-                    book_date_of_first_publication = bookModel.date_of_first_publication,
-                    author_name = author.name,
-                    author_date_of_birth = author.date_of_birth
-                };
-                PostEntry(relation);
+                PostEntry(bookIn, author);
             }
         }
     }
-    public void DeleteBook(BookModel bookModel)
+    public void DeleteBook(Book bookDel)
     {
         //DELETE
         var book = _context.Books.Where(
-            b=>b.name==bookModel.name&&
-            b.date_of_first_publication==bookModel.date_of_first_publication
+            b=>b.name==bookDel.name&&
+            b.date_of_first_publication==bookDel.date_of_first_publication
         ).FirstOrDefault();
         if(book!=null){
             _context.Remove(book);
             _context.SaveChanges();
         }
     }
-    public List<AuthorModel> GetAuthors()
+    public List<Author> GetAuthors()
     {
         //GET
-        List<AuthorModel> response = new List<AuthorModel>();
+        List<Author> response = new List<Author>();
         List<Author> authorList = _context.Authors.ToList();
         foreach(Author author in authorList){
-            List<BookModel> bookList = new List<BookModel>();
+            List<Book> bookList = new List<Book>();
             List<Relation> relationList = _context.Relations.Where(
                 r=>r.authorid==author.id
             ).ToList();
@@ -283,33 +238,22 @@ public class DbHelper
                 var book = _context.Books.Where(
                     b=>b.id==rel.bookid
                 ).FirstOrDefault();
-                bookList.Add(new BookModel(){
-                    isbn = book.isbn,
-                    name = book.name,
-                    date_of_first_publication = book.date_of_first_publication,
-                    edition = book.edition,
-                    publisher = book.publisher,
-                    original_language = book.original_language
-                });
+                bookList.Add(book);
             }
-            response.Add(new AuthorModel(){
-                name = author.name,
-                date_of_birth = author.date_of_birth,
-                country = author.country,
-                books = bookList
-            });
+            author.books = bookList;
+            response.Add(author);
         }
         return response;
     }
-    public List<AuthorModel> SearchAuthor(AuthorModel authorModel)
+    public List<Author> SearchAuthor(Author authorSearch)
     {
         //GET-SEARCH
-        List<AuthorModel> response = new List<AuthorModel>();
+        List<Author> response = new List<Author>();
         List<Author> authorList = _context.Authors.Where(
-            a=>a.name==authorModel.name
+            a=>a.name==authorSearch.name
         ).ToList();
         foreach(Author author in authorList){
-            List<BookModel> bookList = new List<BookModel>();
+            List<Book> bookList = new List<Book>();
             List<Relation> relationList = _context.Relations.Where(
                 r=>r.authorid==author.id
             ).ToList();
@@ -317,104 +261,65 @@ public class DbHelper
                 var book = _context.Books.Where(
                     b=>b.id==rel.bookid
                 ).FirstOrDefault();
-                bookList.Add(new BookModel(){
-                    isbn = book.isbn,
-                    name = book.name,
-                    date_of_first_publication = book.date_of_first_publication,
-                    edition = book.edition,
-                    publisher = book.publisher,
-                    original_language = book.original_language
-                });
+                bookList.Add(book);
             }
-            response.Add(new AuthorModel(){
-                name = author.name,
-                date_of_birth = author.date_of_birth,
-                country = author.country,
-                books = bookList
-            });
+            author.books = bookList;
+            response.Add(author);
         }
         return response;
     }
-    public void PostAuthor(AuthorModel authorModel)
+    public void PostAuthor(Author authorIn)
     {
         var author = _context.Authors.Where(
-            a=>a.name==authorModel.name&&
-            a.date_of_birth==authorModel.date_of_birth
+            a=>a.name==authorIn.name&&
+            a.date_of_birth==authorIn.date_of_birth
         ).FirstOrDefault();
         if(author==null){
             //POST
             author = new Author(){
-                name = authorModel.name,
-                date_of_birth = authorModel.date_of_birth,
-                country = authorModel.country
+                name = authorIn.name,
+                date_of_birth = authorIn.date_of_birth,
+                country = authorIn.country
             };
             _context.Authors.Add(author);
             _context.SaveChanges();
-            foreach(BookModel book in authorModel.books)
+            foreach(Book book in authorIn.books)
             {
                 var addBook = _context.Books.Where(
                     b=>b.name==book.name&&
                     b.date_of_first_publication==book.date_of_first_publication
                 ).FirstOrDefault();
                 if(addBook==null){
-                    addBook = new Book(){
-                        isbn = book.isbn,
-                        name = book.name,
-                        date_of_first_publication = book.date_of_first_publication,
-                        edition = book.edition,
-                        publisher = book.publisher,
-                        original_language = book.original_language
-                    };
-                    _context.Books.Add(addBook);
+                    _context.Books.Add(book);
                     _context.SaveChanges();
                 }
-                RelationModel relation = new RelationModel(){
-                    book_name=book.name,
-                    book_date_of_first_publication=book.date_of_first_publication,
-                    author_name=authorModel.name,
-                    author_date_of_birth=authorModel.date_of_birth
-                };
-                PostEntry(relation);
+                PostEntry(book, authorIn);
             }
         }
         else{
             //PUT
-            author.country=authorModel.country;
+            if(authorIn.country!=null) author.country=authorIn.country;
             _context.SaveChanges();
-            foreach(BookModel book in authorModel.books)
+            foreach(Book book in authorIn.books)
             {
                 var addBook = _context.Books.Where(
                     b=>b.name==book.name&&
                     b.date_of_first_publication==book.date_of_first_publication
                 ).FirstOrDefault();
                 if(addBook==null){
-                    addBook = new Book(){
-                        isbn = book.isbn,
-                        name = book.name,
-                        date_of_first_publication = book.date_of_first_publication,
-                        edition = book.edition,
-                        publisher = book.publisher,
-                        original_language = book.original_language
-                    };
-                    _context.Books.Add(addBook);
+                    _context.Books.Add(book);
                     _context.SaveChanges();
                 }
-                RelationModel relation = new RelationModel(){
-                    book_name=book.name,
-                    book_date_of_first_publication=book.date_of_first_publication,
-                    author_name=authorModel.name,
-                    author_date_of_birth=authorModel.date_of_birth
-                };
-                PostEntry(relation);
+                PostEntry(book, authorIn);
             }
         }
     }
-    public void DeleteAuthor(AuthorModel authorModel)
+    public void DeleteAuthor(Author authorDel)
     {
         //DELETE
         var author = _context.Authors.Where(
-            row=>row.name==authorModel.name&&
-            row.date_of_birth==authorModel.date_of_birth
+            row=>row.name==authorDel.name&&
+            row.date_of_birth==authorDel.date_of_birth
         ).FirstOrDefault();
         if(author!=null){
             _context.Authors.Remove(author);

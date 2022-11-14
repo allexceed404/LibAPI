@@ -8,4 +8,5 @@ public class Author
     public string? name { get; set; }
     public DateTime? date_of_birth { get; set; }
     public string? country { get; set; }
+    public List<Book> books { get; set; } = new List<Book>();
 }

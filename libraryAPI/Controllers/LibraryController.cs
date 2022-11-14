@@ -19,7 +19,7 @@ public class LibraryController : ControllerBase
         ResponseType type = ResponseType.Success;
         try
         {
-            IEnumerable<RelationModel> data = _db.GetEntries();
+            IEnumerable<Book> data = _db.GetEntries();
             if(!data.Any())
             {
                 type = ResponseType.NotFound;
@@ -34,13 +34,15 @@ public class LibraryController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult Post(RelationModel model)
+    public IActionResult Post(Tuple<Book, Author> input)
     {
+        Book book = (Book)input.Item1;
+        Author author = (Author)input.Item2;
         try
         {
             ResponseType type = ResponseType.Success;
-            _db.PostEntry(model);
-            return Ok(ResponseHandler.GetAppResponse(type, model));
+            _db.PostEntry(book, author);
+            return Ok(ResponseHandler.GetAppResponse(type, "Added Successfully"));
         }
         catch (Exception ex)
         {
@@ -48,12 +50,14 @@ public class LibraryController : ControllerBase
         }
     }
     [HttpDelete]
-    public IActionResult Delete([FromBody] RelationModel model)
+    public IActionResult Delete(Tuple<Book, Author> input)
     {
+        Book book = (Book)input.Item1;
+        Author author = (Author)input.Item2;
         try
         {
             ResponseType type = ResponseType.Success;
-            _db.DeleteEntry(model);
+            _db.DeleteEntry(book, author);
             return Ok(ResponseHandler.GetAppResponse(type, "Deleted Successfully"));
         }
         catch (Exception ex)
@@ -79,7 +83,7 @@ public class BookController : ControllerBase
         ResponseType type = ResponseType.Success;
         try
         {
-            IEnumerable<BookModel> data = _db.GetBooks();
+            IEnumerable<Book> data = _db.GetBooks();
             if(!data.Any())
             {
                 type = ResponseType.NotFound;
@@ -93,12 +97,12 @@ public class BookController : ControllerBase
         }
     }
     [HttpGet("search")]
-    public IActionResult Search(BookModel model)
+    public IActionResult Search(Book bookSearch)
     {
         ResponseType type = ResponseType.Success;
         try
         {
-            IEnumerable<BookModel> data = _db.SearchBook(model);
+            IEnumerable<Book> data = _db.SearchBook(bookSearch);
             if(!data.Any())
             {
                 type = ResponseType.NotFound;
@@ -112,13 +116,13 @@ public class BookController : ControllerBase
         }
     }
     [HttpPost]
-    public IActionResult Post(BookModel model)
+    public IActionResult Post(Book bookIn)
     {
         try
         {
             ResponseType type = ResponseType.Success;
-            _db.PostBook(model);
-            return Ok(ResponseHandler.GetAppResponse(type, model));
+            _db.PostBook(bookIn);
+            return Ok(ResponseHandler.GetAppResponse(type, "Added Successfully"));
         }
         catch (Exception ex)
         {
@@ -126,13 +130,13 @@ public class BookController : ControllerBase
         }
     }
     [HttpPut]
-    public IActionResult Put(BookModel model)
+    public IActionResult Put(Book bookUpdate)
     {
         try
         {
             ResponseType type = ResponseType.Success;
-            _db.PostBook(model);
-            return Ok(ResponseHandler.GetAppResponse(type, model));
+            _db.PostBook(bookUpdate);
+            return Ok(ResponseHandler.GetAppResponse(type, "Updated Successfully"));
         }
         catch (Exception ex)
         {
@@ -140,13 +144,13 @@ public class BookController : ControllerBase
         }
     }
     [HttpDelete]
-    public IActionResult Delete(BookModel model)
+    public IActionResult Delete(Book bookDel)
     {
         try
         {
             ResponseType type = ResponseType.Success;
-            _db.DeleteBook(model);
-            return Ok(ResponseHandler.GetAppResponse(type, model));
+            _db.DeleteBook(bookDel);
+            return Ok(ResponseHandler.GetAppResponse(type, "Deleted Successfully"));
         }
         catch (Exception ex)
         {
@@ -171,7 +175,7 @@ public class AuthorController : ControllerBase
         ResponseType type = ResponseType.Success;
         try
         {
-            IEnumerable<AuthorModel> data = _db.GetAuthors();
+            IEnumerable<Author> data = _db.GetAuthors();
             if(!data.Any())
             {
                 type = ResponseType.NotFound;
@@ -185,12 +189,12 @@ public class AuthorController : ControllerBase
         }
     }
     [HttpGet("search")]
-    public IActionResult Search(AuthorModel model)
+    public IActionResult Search(Author authorSearch)
     {
         ResponseType type = ResponseType.Success;
         try
         {
-            IEnumerable<AuthorModel> data = _db.SearchAuthor(model);
+            IEnumerable<Author> data = _db.SearchAuthor(authorSearch);
             if(!data.Any())
             {
                 type = ResponseType.NotFound;
@@ -204,13 +208,13 @@ public class AuthorController : ControllerBase
         }
     }
     [HttpPost]
-    public IActionResult Post(AuthorModel model)
+    public IActionResult Post(Author authorIn)
     {
         try
         {
             ResponseType type = ResponseType.Success;
-            _db.PostAuthor(model);
-            return Ok(ResponseHandler.GetAppResponse(type, model));
+            _db.PostAuthor(authorIn);
+            return Ok(ResponseHandler.GetAppResponse(type, "Added Successfully"));
         }
         catch (Exception ex)
         {
@@ -218,13 +222,13 @@ public class AuthorController : ControllerBase
         }
     }
     [HttpPut]
-    public IActionResult Put(AuthorModel model)
+    public IActionResult Put(Author authorUpdate)
     {
         try
         {
             ResponseType type = ResponseType.Success;
-            _db.PostAuthor(model);
-            return Ok(ResponseHandler.GetAppResponse(type, model));
+            _db.PostAuthor(authorUpdate);
+            return Ok(ResponseHandler.GetAppResponse(type, "Updated Successfully"));
         }
         catch (Exception ex)
         {
@@ -232,13 +236,13 @@ public class AuthorController : ControllerBase
         }
     }
     [HttpDelete]
-    public IActionResult Delete(AuthorModel model)
+    public IActionResult Delete(Author authorDel)
     {
         try
         {
             ResponseType type = ResponseType.Success;
-            _db.DeleteAuthor(model);
-            return Ok(ResponseHandler.GetAppResponse(type, model));
+            _db.DeleteAuthor(authorDel);
+            return Ok(ResponseHandler.GetAppResponse(type, "Deleted Successfully"));
         }
         catch (Exception ex)
         {
