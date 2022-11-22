@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using libraryAPI.EfCore;
@@ -11,9 +12,10 @@ using libraryAPI.EfCore;
 namespace libraryAPI.Migrations
 {
     [DbContext(typeof(EF_DataContext))]
-    partial class EF_DataContextModelSnapshot : ModelSnapshot
+    [Migration("20221114085129_M1")]
+    partial class M1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
